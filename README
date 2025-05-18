@@ -1,1 +1,10 @@
-PvZ test
+# PvZ Clone
+
+This repository contains a very small HTML/JS/CSS implementation inspired by Plants vs. Zombies.
+
+## Quick Start
+
+Open `index.html` in a web browser. Choose a plant type and click on the lawn to
+place it. Sunflowers generate sun which can be spent on more plants while
+peashooters attack zombies. Use the restart button to play again.
+
