@@ -2,5 +2,10 @@
 
 This repository contains a small HTML/JS/CSS implementation inspired by Plants vs. Zombies.
 
-## Quick start
-Open `index.html` in a modern browser. Use the buttons to choose a plant type and click a grid cell to place it. Sunflowers generate sun over time while peashooters attack zombies. Earn sun to place more plants and keep the zombies from reaching the left side. Click **Restart** to start over.
+## Quick Start
+
+1. Clone the repository or download the files.
+2. Open `index.html` in any modern browser.
+3. Click inside the grid to place plants and stop the zombies.
+
+The game now features a score counter, increasing difficulty and a restart button when you lose.
