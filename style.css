@@ -4,6 +4,14 @@ body {
     background-color: #f0f8ff;
 }
 
+#controls {
+    margin: 10px auto;
+}
+
+#controls button {
+    margin-right: 5px;
+}
+
 #game {
     border: 1px solid #333;
     background-color: #90ee90;

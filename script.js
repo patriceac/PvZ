@@ -1,58 +1,97 @@
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const statusEl = document.getElementById('status');
+const sunflowerBtn = document.getElementById('sunflowerBtn');
+const peashooterBtn = document.getElementById('peashooterBtn');
 const restartBtn = document.getElementById('restart');
+const sunEl = document.getElementById('sun');
+const scoreEl = document.getElementById('score');
 
 const ROWS = 5;
 const COLS = 9;
 const CELL_WIDTH = canvas.width / COLS;
 const CELL_HEIGHT = canvas.height / ROWS;
 
+let selectedType = 'peashooter';
+let sun = 50;
+let score = 0;
+
 const plants = [];
 const peas = [];
 const zombies = [];
 let lastZombieSpawn = 0;
-let spawnInterval = 2000;
+let zombieSpawnInterval = 5000;
 let gameOver = false;
-let score = 0;
-let elapsed = 0;
+let lastTime = performance.now();
 
-canvas.addEventListener('click', (e) => {
+const plantCosts = { sunflower: 50, peashooter: 100 };
+
+sunflowerBtn.addEventListener('click', () => selectedType = 'sunflower');
+peashooterBtn.addEventListener('click', () => selectedType = 'peashooter');
+restartBtn.addEventListener('click', restartGame);
+
+canvas.addEventListener('click', e => {
     if (gameOver) return;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const col = Math.floor(x / CELL_WIDTH);
-    const row = Math.floor(y / CELL_HEIGHT);
-    if (!plants.some(p => p.row === row && p.col === col)) {
-        plants.push({ row, col, cooldown: 0, health: 5 });
+    const col = Math.floor((e.clientX - rect.left) / CELL_WIDTH);
+    const row = Math.floor((e.clientY - rect.top) / CELL_HEIGHT);
+    if (plants.some(p => p.row === row && p.col === col)) return;
+    const cost = plantCosts[selectedType];
+    if (sun < cost) return;
+    sun -= cost;
+    sunEl.textContent = sun;
+    if (selectedType === 'sunflower') {
+        plants.push({ row, col, type: 'sunflower', cooldown: 5000, health: 5 });
+    } else {
+        plants.push({ row, col, type: 'peashooter', cooldown: 0, health: 5 });
     }
 });
 
+function restartGame() {
+    plants.length = 0;
+    peas.length = 0;
+    zombies.length = 0;
+    sun = 50;
+    score = 0;
+    lastZombieSpawn = 0;
+    zombieSpawnInterval = 5000;
+    selectedType = 'peashooter';
+    sunEl.textContent = sun;
+    scoreEl.textContent = score;
+    statusEl.textContent = '';
+    gameOver = false;
+    lastTime = performance.now();
+    requestAnimationFrame(gameLoop);
+}
+
 function spawnZombie() {
     const row = Math.floor(Math.random() * ROWS);
-    // Speed is now measured in pixels per second instead of per millisecond
-    // Start slower and gradually speed up as the game progresses
-    const speed = 40 + elapsed / 1000; // increase speed over time
+    const speed = 40 + Math.random() * 20 + score * 2;
     zombies.push({ x: canvas.width, row, health: 5, speed });
 }
 
 function update(delta) {
-    statusEl.textContent = `Score: ${score}`;
-    elapsed += delta;
-    // plants shoot peas
+    // plants produce sun or shoot
     plants.forEach(p => {
         p.cooldown -= delta;
-        if (p.cooldown <= 0) {
-            peas.push({ x: p.col * CELL_WIDTH + CELL_WIDTH / 2, row: p.row });
-            p.cooldown = 1000; // shoot every second
+        if (p.type === 'sunflower') {
+            if (p.cooldown <= 0) {
+                sun += 25;
+                sunEl.textContent = sun;
+                p.cooldown = 5000;
+            }
+        } else if (p.type === 'peashooter') {
+            if (p.cooldown <= 0) {
+                peas.push({ x: p.col * CELL_WIDTH + CELL_WIDTH / 2, row: p.row });
+                p.cooldown = 1000;
+            }
         }
     });
 
     // update peas
     for (let i = peas.length - 1; i >= 0; i--) {
         const pea = peas[i];
-        pea.x += 0.4 * delta;
+        pea.x += 200 * (delta / 1000);
         if (pea.x > canvas.width) {
             peas.splice(i, 1);
             continue;
@@ -68,16 +107,15 @@ function update(delta) {
     // update zombies
     for (let i = zombies.length - 1; i >= 0; i--) {
         const z = zombies[i];
-        // delta is in milliseconds; convert to seconds for speed calculation
         z.x -= z.speed * (delta / 1000);
         if (z.x < 0) {
+            statusEl.textContent = 'Game Over!';
             gameOver = true;
-            statusEl.textContent = `Game Over! Final Score: ${score}`;
-            restartBtn.style.display = 'inline-block';
+            return;
         }
         const plant = plants.find(p => p.row === z.row && z.x < (p.col + 1) * CELL_WIDTH - 10);
         if (plant) {
-            plant.health -= 0.02 * delta;
+            plant.health -= 20 * (delta / 1000);
             if (plant.health <= 0) {
                 plants.splice(plants.indexOf(plant), 1);
             }
@@ -85,15 +123,16 @@ function update(delta) {
         if (z.health <= 0) {
             zombies.splice(i, 1);
             score += 1;
+            scoreEl.textContent = score;
         }
     }
 
     // spawn zombies
     lastZombieSpawn += delta;
-    if (lastZombieSpawn > spawnInterval) {
+    if (lastZombieSpawn > zombieSpawnInterval) {
         spawnZombie();
         lastZombieSpawn = 0;
-        spawnInterval = Math.max(800, spawnInterval - 20); // increase difficulty
+        if (zombieSpawnInterval > 1500) zombieSpawnInterval -= 100;
     }
 }
 
@@ -117,8 +156,8 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
     // draw plants
-    ctx.fillStyle = 'green';
     plants.forEach(p => {
+        ctx.fillStyle = p.type === 'sunflower' ? 'orange' : 'green';
         ctx.fillRect(p.col * CELL_WIDTH + 5, p.row * CELL_HEIGHT + 5, CELL_WIDTH - 10, CELL_HEIGHT - 10);
     });
     // draw peas
@@ -135,7 +174,6 @@ function draw() {
     });
 }
 
-let lastTime = performance.now();
 function gameLoop(time) {
     const delta = time - lastTime;
     lastTime = time;
@@ -145,22 +183,4 @@ function gameLoop(time) {
         requestAnimationFrame(gameLoop);
     }
 }
-
-function initGame() {
-    plants.length = 0;
-    peas.length = 0;
-    zombies.length = 0;
-    score = 0;
-    elapsed = 0;
-    spawnInterval = 2000;
-    gameOver = false;
-    lastZombieSpawn = 0;
-    statusEl.textContent = '';
-    restartBtn.style.display = 'none';
-    lastTime = performance.now();
-    requestAnimationFrame(gameLoop);
-}
-
-restartBtn.addEventListener('click', initGame);
-
-initGame();
+requestAnimationFrame(gameLoop);
