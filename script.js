@@ -6,6 +6,7 @@ const peashooterBtn = document.getElementById('peashooterBtn');
 const restartBtn = document.getElementById('restart');
 const sunEl = document.getElementById('sun');
 const scoreEl = document.getElementById('score');
+const overlay = document.getElementById('overlay');
 
 const ROWS = 5;
 const COLS = 9;
@@ -56,14 +57,24 @@ canvas.addEventListener('click', e => {
     if (sun < cost) return;
     sun -= cost;
     sunEl.textContent = sun;
+    const el = document.createElement('div');
+    el.classList.add('plant', selectedType);
+    el.style.width = (CELL_WIDTH - 10) + 'px';
+    el.style.height = (CELL_HEIGHT - 10) + 'px';
+    el.style.left = (col * CELL_WIDTH + 5) + 'px';
+    el.style.top = (row * CELL_HEIGHT + 5) + 'px';
+    overlay.appendChild(el);
     if (selectedType === 'sunflower') {
-        plants.push({ row, col, type: 'sunflower', cooldown: 5000, health: 5 });
+        plants.push({ row, col, type: 'sunflower', cooldown: 5000, health: 5, el });
     } else {
-        plants.push({ row, col, type: 'peashooter', cooldown: 0, health: 5 });
+        plants.push({ row, col, type: 'peashooter', cooldown: 0, health: 5, el });
     }
 });
 
 function restartGame() {
+    plants.forEach(p => p.el.remove());
+    peas.forEach(p => p.el.remove());
+    zombies.forEach(z => z.el.remove());
     plants.length = 0;
     peas.length = 0;
     zombies.length = 0;
@@ -84,7 +95,14 @@ function restartGame() {
 function spawnZombie() {
     const row = Math.floor(Math.random() * ROWS);
     const speed = 40 + Math.random() * 20 + score * 2;
-    zombies.push({ x: canvas.width, row, health: 5, speed });
+    const el = document.createElement('div');
+    el.classList.add('zombie');
+    el.style.width = (CELL_WIDTH - 10) + 'px';
+    el.style.height = (CELL_HEIGHT - 10) + 'px';
+    el.style.left = (canvas.width - CELL_WIDTH / 2) + 'px';
+    el.style.top = (row * CELL_HEIGHT + 5) + 'px';
+    overlay.appendChild(el);
+    zombies.push({ x: canvas.width, row, health: 5, speed, el });
 }
 
 function update(delta) {
@@ -99,7 +117,12 @@ function update(delta) {
             }
         } else if (p.type === 'peashooter') {
             if (p.cooldown <= 0) {
-                peas.push({ x: p.col * CELL_WIDTH + CELL_WIDTH / 2, row: p.row });
+                const peaEl = document.createElement('div');
+                peaEl.classList.add('pea');
+                peaEl.style.left = (p.col * CELL_WIDTH + CELL_WIDTH / 2 - 5) + 'px';
+                peaEl.style.top = (p.row * CELL_HEIGHT + CELL_HEIGHT / 2 - 5) + 'px';
+                overlay.appendChild(peaEl);
+                peas.push({ x: p.col * CELL_WIDTH + CELL_WIDTH / 2, row: p.row, el: peaEl });
                 p.cooldown = 1000;
             }
         }
@@ -110,12 +133,15 @@ function update(delta) {
         const pea = peas[i];
         pea.x += 200 * (delta / 1000);
         if (pea.x > canvas.width) {
+            pea.el.remove();
             peas.splice(i, 1);
             continue;
         }
+        pea.el.style.left = (pea.x - 5) + 'px';
         zombies.forEach(z => {
             if (z.row === pea.row && Math.abs(z.x - pea.x) < 10) {
                 z.health -= 1;
+                pea.el.remove();
                 peas.splice(i, 1);
             }
         });
@@ -125,6 +151,7 @@ function update(delta) {
     for (let i = zombies.length - 1; i >= 0; i--) {
         const z = zombies[i];
         z.x -= z.speed * (delta / 1000);
+        z.el.style.left = (z.x - CELL_WIDTH / 2) + 'px';
         if (z.x < 0) {
             statusEl.textContent = 'Game Over!';
             gameOver = true;
@@ -134,10 +161,12 @@ function update(delta) {
         if (plant) {
             plant.health -= 20 * (delta / 1000);
             if (plant.health <= 0) {
+                plant.el.remove();
                 plants.splice(plants.indexOf(plant), 1);
             }
         }
         if (z.health <= 0) {
+            z.el.remove();
             zombies.splice(i, 1);
             score += 1;
             scoreEl.textContent = score;
@@ -172,23 +201,6 @@ function drawGrid() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
-    // draw plants
-    plants.forEach(p => {
-        ctx.fillStyle = p.type === 'sunflower' ? 'orange' : 'green';
-        ctx.fillRect(p.col * CELL_WIDTH + 5, p.row * CELL_HEIGHT + 5, CELL_WIDTH - 10, CELL_HEIGHT - 10);
-    });
-    // draw peas
-    ctx.fillStyle = 'yellow';
-    peas.forEach(pea => {
-        ctx.beginPath();
-        ctx.arc(pea.x, pea.row * CELL_HEIGHT + CELL_HEIGHT / 2, 5, 0, Math.PI * 2);
-        ctx.fill();
-    });
-    // draw zombies
-    ctx.fillStyle = 'gray';
-    zombies.forEach(z => {
-        ctx.fillRect(z.x - CELL_WIDTH / 2, z.row * CELL_HEIGHT + 5, CELL_WIDTH - 10, CELL_HEIGHT - 10);
-    });
 }
 
 function gameLoop(time) {
