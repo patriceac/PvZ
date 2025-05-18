@@ -31,7 +31,9 @@ canvas.addEventListener('click', (e) => {
 
 function spawnZombie() {
     const row = Math.floor(Math.random() * ROWS);
-    const speed = 0.5 + elapsed / 30000; // increase speed over time
+    // Speed is now measured in pixels per second instead of per millisecond
+    // Start slower and gradually speed up as the game progresses
+    const speed = 40 + elapsed / 1000; // increase speed over time
     zombies.push({ x: canvas.width, row, health: 5, speed });
 }
 
@@ -66,7 +68,8 @@ function update(delta) {
     // update zombies
     for (let i = zombies.length - 1; i >= 0; i--) {
         const z = zombies[i];
-        z.x -= z.speed * delta;
+        // delta is in milliseconds; convert to seconds for speed calculation
+        z.x -= z.speed * (delta / 1000);
         if (z.x < 0) {
             gameOver = true;
             statusEl.textContent = `Game Over! Final Score: ${score}`;
