@@ -1,0 +1,18 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f8ff;
+}
+
+#game {
+    border: 1px solid #333;
+    background-color: #90ee90;
+}
+
+#controls {
+    margin-bottom: 10px;
+}
+
+#controls button {
+    margin-right: 5px;
+}

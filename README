@@ -1,1 +1,4 @@
-PvZ test
+# PvZ Clone
+
+This repository contains a very small HTML/JS/CSS implementation inspired by Plants vs. Zombies.
+Open `index.html` in a browser to play.
