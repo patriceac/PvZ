@@ -8,4 +8,6 @@ This repository contains a small HTML/JS/CSS implementation inspired by Plants v
 2. Open `index.html` in any modern browser.
 3. Click inside the grid to place plants and stop the zombies.
 
-The game now features a score counter, increasing difficulty and a restart button when you lose. Zombies spawn more slowly at first and speed up as the game progresses.
+The game now features a score counter, level progression and a restart button when you lose. Zombies spawn more slowly at first and speed up as the game progresses. Each level ends after a fixed number of zombies are defeated and the next level begins automatically.
+
+Peashooters will only fire when a zombie is in the same row, saving resources when lanes are empty.

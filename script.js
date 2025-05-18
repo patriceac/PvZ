@@ -16,6 +16,9 @@ const CELL_HEIGHT = canvas.height / ROWS;
 let selectedType = 'peashooter';
 let sun = 50;
 let score = 0;
+let level = 1;
+let zombiesToSpawn = 5;
+let levelTransition = false;
 
 const plants = [];
 const peas = [];
@@ -84,16 +87,31 @@ function restartGame() {
     zombies.length = 0;
     sun = 50;
     score = 0;
+    level = 1;
+    zombiesToSpawn = 5;
+    levelTransition = false;
     lastZombieSpawn = -INITIAL_ZOMBIE_DELAY;
-    zombieSpawnInterval = 15000;
     selectedType = 'peashooter';
     updateSelection();
     sunEl.textContent = sun;
     scoreEl.textContent = score;
+    const levelEl = document.getElementById('level');
+    if (levelEl) levelEl.textContent = level;
     statusEl.textContent = '';
+    startLevel();
     gameOver = false;
     lastTime = performance.now();
     requestAnimationFrame(gameLoop);
+}
+
+function startLevel() {
+    const levelEl = document.getElementById('level');
+    if (levelEl) levelEl.textContent = level;
+    zombiesToSpawn = 5 + (level - 1) * 3;
+    zombieSpawnInterval = Math.max(15000 - level * 1000, 2000);
+    lastZombieSpawn = -INITIAL_ZOMBIE_DELAY;
+    levelTransition = false;
+    statusEl.textContent = '';
 }
 
 function spawnZombie() {
@@ -130,7 +148,8 @@ function update(delta) {
                 p.cooldown = 5000;
             }
         } else if (p.type === 'peashooter') {
-            if (p.cooldown <= 0) {
+            const zombieInLane = zombies.some(z => z.row === p.row && z.x > p.col * CELL_WIDTH);
+            if (zombieInLane && p.cooldown <= 0) {
                 const peaEl = document.createElement('div');
                 peaEl.classList.add('pea');
                 peaEl.style.left = (p.col * CELL_WIDTH + CELL_WIDTH / 2 - 5) + 'px';
@@ -194,8 +213,9 @@ function update(delta) {
 
     // spawn zombies
     lastZombieSpawn += delta;
-    if (lastZombieSpawn > zombieSpawnInterval) {
+    if (zombiesToSpawn > 0 && lastZombieSpawn > zombieSpawnInterval) {
         spawnZombie();
+        zombiesToSpawn--;
         lastZombieSpawn = 0;
         if (zombieSpawnInterval > 8000) {
             zombieSpawnInterval -= 1000;
@@ -204,6 +224,14 @@ function update(delta) {
         } else if (zombieSpawnInterval > 1500) {
             zombieSpawnInterval -= 100;
         }
+    }
+
+    // check for level completion
+    if (zombiesToSpawn === 0 && zombies.length === 0 && !levelTransition) {
+        levelTransition = true;
+        statusEl.textContent = `Level ${level} complete!`;
+        level += 1;
+        setTimeout(startLevel, 3000);
     }
 }
 
