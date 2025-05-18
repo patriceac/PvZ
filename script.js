@@ -20,7 +20,8 @@ let score = 0;
 const plants = [];
 const peas = [];
 const zombies = [];
-let lastZombieSpawn = 0;
+const INITIAL_ZOMBIE_DELAY = 10000;
+let lastZombieSpawn = -INITIAL_ZOMBIE_DELAY;
 let zombieSpawnInterval = 15000;
 let gameOver = false;
 let lastTime = performance.now();
@@ -74,13 +75,16 @@ canvas.addEventListener('click', e => {
 function restartGame() {
     plants.forEach(p => p.el.remove());
     peas.forEach(p => p.el.remove());
-    zombies.forEach(z => z.el.remove());
+    zombies.forEach(z => {
+        z.el.remove();
+        z.bar.remove();
+    });
     plants.length = 0;
     peas.length = 0;
     zombies.length = 0;
     sun = 50;
     score = 0;
-    lastZombieSpawn = 0;
+    lastZombieSpawn = -INITIAL_ZOMBIE_DELAY;
     zombieSpawnInterval = 15000;
     selectedType = 'peashooter';
     updateSelection();
@@ -101,8 +105,18 @@ function spawnZombie() {
     el.style.height = (CELL_HEIGHT - 10) + 'px';
     el.style.left = (canvas.width - CELL_WIDTH / 2) + 'px';
     el.style.top = (row * CELL_HEIGHT + 5) + 'px';
+    const bar = document.createElement('div');
+    bar.classList.add('health-bar');
+    bar.style.width = (CELL_WIDTH - 10) + 'px';
+    bar.style.left = (canvas.width - CELL_WIDTH / 2) + 'px';
+    bar.style.top = (row * CELL_HEIGHT) + 'px';
+    const barInner = document.createElement('div');
+    barInner.classList.add('health-bar-inner');
+    barInner.style.width = '100%';
+    bar.appendChild(barInner);
+    overlay.appendChild(bar);
     overlay.appendChild(el);
-    zombies.push({ x: canvas.width, row, health: 5, speed, el });
+    zombies.push({ x: canvas.width, row, health: 5, maxHealth: 5, speed, el, bar, barInner });
 }
 
 function update(delta) {
@@ -152,7 +166,11 @@ function update(delta) {
         const z = zombies[i];
         z.x -= z.speed * (delta / 1000);
         z.el.style.left = (z.x - CELL_WIDTH / 2) + 'px';
+        z.bar.style.left = (z.x - CELL_WIDTH / 2) + 'px';
+        z.barInner.style.width = ((z.health / z.maxHealth) * 100) + '%';
         if (z.x < 0) {
+            z.el.remove();
+            z.bar.remove();
             statusEl.textContent = 'Game Over!';
             gameOver = true;
             return;
@@ -167,6 +185,7 @@ function update(delta) {
         }
         if (z.health <= 0) {
             z.el.remove();
+            z.bar.remove();
             zombies.splice(i, 1);
             score += 1;
             scoreEl.textContent = score;
