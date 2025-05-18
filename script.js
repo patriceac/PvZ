@@ -21,7 +21,7 @@ const plants = [];
 const peas = [];
 const zombies = [];
 let lastZombieSpawn = 0;
-let zombieSpawnInterval = 10000;
+let zombieSpawnInterval = 15000;
 let gameOver = false;
 let lastTime = performance.now();
 
@@ -81,7 +81,7 @@ function restartGame() {
     sun = 50;
     score = 0;
     lastZombieSpawn = 0;
-    zombieSpawnInterval = 10000;
+    zombieSpawnInterval = 15000;
     selectedType = 'peashooter';
     updateSelection();
     sunEl.textContent = sun;
@@ -178,7 +178,13 @@ function update(delta) {
     if (lastZombieSpawn > zombieSpawnInterval) {
         spawnZombie();
         lastZombieSpawn = 0;
-        if (zombieSpawnInterval > 1500) zombieSpawnInterval -= 100;
+        if (zombieSpawnInterval > 8000) {
+            zombieSpawnInterval -= 1000;
+        } else if (zombieSpawnInterval > 5000) {
+            zombieSpawnInterval -= 500;
+        } else if (zombieSpawnInterval > 1500) {
+            zombieSpawnInterval -= 100;
+        }
     }
 }
 
