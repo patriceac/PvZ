@@ -20,15 +20,31 @@ const plants = [];
 const peas = [];
 const zombies = [];
 let lastZombieSpawn = 0;
-let zombieSpawnInterval = 5000;
+let zombieSpawnInterval = 10000;
 let gameOver = false;
 let lastTime = performance.now();
 
 const plantCosts = { sunflower: 50, peashooter: 100 };
 
-sunflowerBtn.addEventListener('click', () => selectedType = 'sunflower');
-peashooterBtn.addEventListener('click', () => selectedType = 'peashooter');
+function updateSelection() {
+    sunflowerBtn.classList.toggle('selected', selectedType === 'sunflower');
+    peashooterBtn.classList.toggle('selected', selectedType === 'peashooter');
+    const selEl = document.getElementById('selected');
+    if (selEl) selEl.textContent = selectedType.charAt(0).toUpperCase() + selectedType.slice(1);
+}
+
+sunflowerBtn.addEventListener('click', () => {
+    selectedType = 'sunflower';
+    updateSelection();
+});
+peashooterBtn.addEventListener('click', () => {
+    selectedType = 'peashooter';
+    updateSelection();
+});
 restartBtn.addEventListener('click', restartGame);
+
+// highlight initial selection
+updateSelection();
 
 canvas.addEventListener('click', e => {
     if (gameOver) return;
@@ -54,8 +70,9 @@ function restartGame() {
     sun = 50;
     score = 0;
     lastZombieSpawn = 0;
-    zombieSpawnInterval = 5000;
+    zombieSpawnInterval = 10000;
     selectedType = 'peashooter';
+    updateSelection();
     sunEl.textContent = sun;
     scoreEl.textContent = score;
     statusEl.textContent = '';
