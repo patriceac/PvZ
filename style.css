@@ -21,6 +21,45 @@ body {
     background-color: #90ee90;
 }
 
+#game-container {
+    position: relative;
+    display: inline-block;
+}
+
+#overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.plant, .zombie, .pea {
+    position: absolute;
+}
+
+.sunflower {
+    background-color: orange;
+    border-radius: 50%;
+}
+
+.peashooter {
+    background-color: green;
+    border-radius: 50%;
+}
+
+.zombie {
+    background-color: gray;
+}
+
+.pea {
+    background-color: yellow;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+}
+
 #restart {
     margin-top: 10px;
     padding: 5px 10px;
