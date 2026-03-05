@@ -175,6 +175,26 @@ export class GameApp {
     spawnZombieForDebug(this.state, "basic", 0, HOUSE.x - 6);
   }
 
+  advanceForTest(durationMs, stepMs = GAME.fixedStepMs) {
+    if (!this.state || this.state.status !== "running") {
+      return this.getSnapshot();
+    }
+    const maxDuration = Math.max(0, durationMs);
+    const fixedStep = Math.max(1, stepMs);
+    let elapsedMs = 0;
+
+    while (elapsedMs < maxDuration && this.state.status === "running") {
+      const dt = Math.min(fixedStep, maxDuration - elapsedMs);
+      const actions = this.consumeActions();
+      this.injectAutoplayActions(actions);
+      stepGameState(this.state, actions, dt);
+      elapsedMs += dt;
+    }
+
+    this.render();
+    return this.getSnapshot();
+  }
+
   enqueueAction(action) {
     if (!this.state) {
       return;

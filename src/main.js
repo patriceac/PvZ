@@ -1,4 +1,5 @@
 import {
+  advanceGameForTest,
   forceLoseForTest,
   getGameSnapshot,
   prepareMenu,
@@ -106,6 +107,7 @@ window.__PVZ_TEST_API__ = {
       difficulty: "smoke",
       autoplay: "win"
     });
+    advanceGameForTest(45000);
   },
   runForcedLose: async () => {
     await startGame({

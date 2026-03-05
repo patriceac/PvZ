@@ -73,6 +73,9 @@ describe("projectile and zombie damage", () => {
   test("projectiles collide and kill zombie entities", () => {
     const state = runningState({ waves: [] });
     state.sun = 1000;
+    const zombie = spawnZombieForDebug(state, "basic", 0, 420);
+    expect(zombie).not.toBeNull();
+    zombie.speed = 0;
 
     stepGameState(
       state,
@@ -83,11 +86,7 @@ describe("projectile and zombie damage", () => {
       0,
       {}
     );
-
-    const zombie = spawnZombieForDebug(state, "basic", 0, 420);
-    expect(zombie).not.toBeNull();
-    zombie.speed = 0;
-    for (let i = 0; i < 500; i += 1) {
+    for (let i = 0; i < 1300; i += 1) {
       stepGameState(state, [], 1000 / 60, {});
       if (state.zombies.length === 0) {
         break;

@@ -49,6 +49,13 @@ export function forceLoseForTest() {
   app.forceLoseScenario();
 }
 
+export function advanceGameForTest(durationMs, stepMs) {
+  if (!app) {
+    return null;
+  }
+  return app.advanceForTest(durationMs, stepMs);
+}
+
 export function getGameSnapshot() {
   if (!app) {
     return null;
