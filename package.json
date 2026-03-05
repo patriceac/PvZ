@@ -1,0 +1,17 @@
+{
+  "name": "backyard-defense",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "http-server . -p 4173 -c-1",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.0",
+    "http-server": "^14.1.1",
+    "vitest": "^2.1.8"
+  }
+}
