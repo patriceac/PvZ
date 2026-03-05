@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Backyard Defense</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <h1>Backyard Defense</h1>
+        <div class="topbar-controls">
+          <label for="difficulty-select">Difficulty</label>
+          <select id="difficulty-select" aria-label="Difficulty">
+            <option value="normal">Normal</option>
+            <option value="hard">Hard</option>
+            <option value="smoke">Smoke Test</option>
+          </select>
+          <button id="start-button" type="button">Start</button>
+          <button id="pause-button" type="button">Pause</button>
+          <button id="restart-button" type="button">Restart</button>
+        </div>
+      </header>
+
+      <section class="hud">
+        <div id="sun-count" class="hud-chip" aria-live="polite">Sun: 0</div>
+        <div id="wave-status" class="hud-chip" aria-live="polite">Wave: 0 / 0</div>
+      </section>
+
+      <section id="seed-bank" class="seed-bank" aria-label="Seed bank"></section>
+
+      <section class="board-wrap">
+        <canvas id="game-canvas" width="1280" height="720" aria-label="Backyard Defense board"></canvas>
+
+        <div id="overlay" class="overlay">
+          <h2 id="overlay-title">Backyard Defense</h2>
+          <p id="overlay-text">Defend the house with plants. No audio in this build.</p>
+          <button id="overlay-action" type="button">Start Match</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
